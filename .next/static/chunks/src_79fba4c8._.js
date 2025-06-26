@@ -10,14 +10,30 @@ __turbopack_context__.s({
     "getPopularMovies": (()=>getPopularMovies),
     "searchMovies": (()=>searchMovies)
 });
-const API_KEY = "3e12b35af669262af3ad6f1a1c85f6d6";
+const API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NThlMTVkZTdiYzM2ZGI1ZDk5NzBiZDA5ZWM3NjA1YyIsInN1YiI6IjY1YTZhODVkNzA2ZTU2MDEyZGE1ZjBiZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8h5T-QO_xeXj4Jn9dR9n6E1sGtDN5MZVHxD5DhXbrO0";
 const BASE_URL = "https://api.themoviedb.org/3";
+async function fetchWithErrorHandling(url) {
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'accept': 'application/json'
+        }
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(()=>({}));
+        console.error('API Error:', {
+            status: response.status,
+            statusText: response.statusText,
+            errorData
+        });
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+    return response.json();
+}
 async function getPopularMovies() {
     try {
-        const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
-        if (!res.ok) throw new Error("Failed to fetch popular movies");
-        const data = await res.json();
-        return data.results;
+        const data = await fetchWithErrorHandling(`${BASE_URL}/movie/popular?language=en-US&page=1`);
+        return data.results || [];
     } catch (error) {
         console.error("Error fetching popular movies:", error);
         return [];
@@ -25,9 +41,7 @@ async function getPopularMovies() {
 }
 async function getMovieDetails(id) {
     try {
-        const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US`);
-        if (!res.ok) throw new Error("Failed to fetch movie details");
-        return await res.json();
+        return await fetchWithErrorHandling(`${BASE_URL}/movie/${id}?language=en-US`);
     } catch (error) {
         console.error("Error fetching movie details:", error);
         return null;
@@ -35,10 +49,8 @@ async function getMovieDetails(id) {
 }
 async function searchMovies(query) {
     try {
-        const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=1`);
-        if (!res.ok) throw new Error("Failed to search movies");
-        const data = await res.json();
-        return data.results;
+        const data = await fetchWithErrorHandling(`${BASE_URL}/search/movie?language=en-US&query=${encodeURIComponent(query)}&page=1`);
+        return data.results || [];
     } catch (error) {
         console.error("Error searching movies:", error);
         return [];
