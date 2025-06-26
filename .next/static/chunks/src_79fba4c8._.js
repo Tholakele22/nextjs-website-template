@@ -10,17 +10,17 @@ __turbopack_context__.s({
     "getPopularMovies": (()=>getPopularMovies),
     "searchMovies": (()=>searchMovies)
 });
-const API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NThlMTVkZTdiYzM2ZGI1ZDk5NzBiZDA5ZWM3NjA1YyIsInN1YiI6IjY1YTZhODVkNzA2ZTU2MDEyZGE1ZjBiZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8h5T-QO_xeXj4Jn9dR9n6E1sGtDN5MZVHxD5DhXbrO0";
+const API_KEY = "b6e66a75a82fc1e43e8067b4c8958c55";
 const BASE_URL = "https://api.themoviedb.org/3";
 async function fetchWithErrorHandling(url) {
+    console.log('Fetching URL:', url);
     const response = await fetch(url, {
         headers: {
-            'Authorization': `Bearer ${API_KEY}`,
-            'accept': 'application/json'
+            'Content-Type': 'application/json'
         }
     });
     if (!response.ok) {
-        const errorData = await response.json().catch(()=>({}));
+        const errorText = await response.text();
         console.error('API Error:', {
             status: response.status,
             statusText: response.statusText,
@@ -32,7 +32,7 @@ async function fetchWithErrorHandling(url) {
 }
 async function getPopularMovies() {
     try {
-        const data = await fetchWithErrorHandling(`${BASE_URL}/movie/popular?language=en-US&page=1`);
+        const data = await fetchWithErrorHandling(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
         return data.results || [];
     } catch (error) {
         console.error("Error fetching popular movies:", error);
@@ -41,7 +41,7 @@ async function getPopularMovies() {
 }
 async function getMovieDetails(id) {
     try {
-        return await fetchWithErrorHandling(`${BASE_URL}/movie/${id}?language=en-US`);
+        return await fetchWithErrorHandling(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US`);
     } catch (error) {
         console.error("Error fetching movie details:", error);
         return null;
@@ -49,7 +49,7 @@ async function getMovieDetails(id) {
 }
 async function searchMovies(query) {
     try {
-        const data = await fetchWithErrorHandling(`${BASE_URL}/search/movie?language=en-US&query=${encodeURIComponent(query)}&page=1`);
+        const data = await fetchWithErrorHandling(`${BASE_URL}/search/movie?api_key=${API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=1`);
         return data.results || [];
     } catch (error) {
         console.error("Error searching movies:", error);
